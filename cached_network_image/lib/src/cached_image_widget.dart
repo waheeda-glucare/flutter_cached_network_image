@@ -206,7 +206,7 @@ class CachedNetworkImage extends StatelessWidget {
   /// Listener to be called when images fails to load.
   final ValueChanged<Object>? errorListener;
 
-  void setGlobalHeaders(Map<String, String> headers) {
+  static void setGlobalHeaders(Map<String, String> headers) {
     cachedNetworkImageConfig.setGlobalHeaders(headers);
   }
 
