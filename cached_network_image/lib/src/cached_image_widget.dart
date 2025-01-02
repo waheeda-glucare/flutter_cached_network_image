@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/src/cached_network_image_config.dart';
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -61,7 +62,7 @@ class CachedNetworkImage extends StatelessWidget {
     return CachedNetworkImageProvider(url, scale: scale).evict();
   }
 
-  final CachedNetworkImageProvider _image;
+  late CachedNetworkImageProvider _image;
 
   /// Option to use cacheManager with other settings
   final BaseCacheManager? cacheManager;
@@ -205,6 +206,10 @@ class CachedNetworkImage extends StatelessWidget {
   /// Listener to be called when images fails to load.
   final ValueChanged<Object>? errorListener;
 
+  void setGlobalHeaders(Map<String, String> headers) {
+    cachedNetworkImageConfig.setGlobalHeaders(headers);
+  }
+
   /// CachedNetworkImage shows a network image using a caching mechanism. It also
   /// provides support for a placeholder, showing an error and fading into the
   /// loaded image. Next to that it supports most features of a default Image
@@ -242,17 +247,24 @@ class CachedNetworkImage extends StatelessWidget {
     ImageRenderMethodForWeb imageRenderMethodForWeb =
         ImageRenderMethodForWeb.HtmlImage,
     double scale = 1.0,
-  }) : _image = CachedNetworkImageProvider(
-          imageUrl,
-          headers: httpHeaders,
-          cacheManager: cacheManager,
-          cacheKey: cacheKey,
-          imageRenderMethodForWeb: imageRenderMethodForWeb,
-          maxWidth: maxWidthDiskCache,
-          maxHeight: maxHeightDiskCache,
-          errorListener: errorListener,
-          scale: scale,
-        );
+  }) {
+    final combinedHeaders = {
+      ...?cachedNetworkImageConfig.globalHeaders,
+      ...?httpHeaders,
+    };
+
+    _image = CachedNetworkImageProvider(
+      imageUrl,
+      headers: combinedHeaders,
+      cacheManager: cacheManager,
+      cacheKey: cacheKey,
+      imageRenderMethodForWeb: imageRenderMethodForWeb,
+      maxWidth: maxWidthDiskCache,
+      maxHeight: maxHeightDiskCache,
+      errorListener: errorListener,
+      scale: scale,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
